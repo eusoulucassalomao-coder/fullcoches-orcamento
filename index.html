@@ -537,7 +537,9 @@ async function enviarWhatsApp(telefone, nome, link, veiculo) {
   await fetch(`${WHATSAPP_API_URL}/message/sendText/${WHATSAPP_INSTANCE}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'apikey': WHATSAPP_API_KEY },
-    body: JSON.stringify({ number: '34' + telefone, text: mensaje })
+    const numeroLimpo = telefone.replace(/\D/g, '');
+    const numero = numeroLimpo.startsWith('34') ? numeroLimpo : '34' + numeroLimpo;
+    body: JSON.stringify({ number: numero, text: mensaje })
   });
 }
 

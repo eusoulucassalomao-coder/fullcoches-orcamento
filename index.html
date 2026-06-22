@@ -505,7 +505,7 @@ async function enviarOrcamento() {
       });
     }
 
-    const linkCliente = `https://eusoulucassalomao-coder.github.io/fullcoches-orcamento/orcamento.html?token=${token}`;
+    const linkCliente = `https://fullcochespresupuestos.netlify.app/orcamento.html?token=${token}`;
     await enviarWhatsApp(v('cliente_telefone').replace(/\D/g, ''), v('cliente_nome'), linkCliente, v('veiculo_marca') + ' ' + v('veiculo_modelo'));
 
     toast('✅ ¡Presupuesto enviado con éxito!');

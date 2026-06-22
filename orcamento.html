@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orçamento Digital</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --blue: #1a6fd4; --blue-light: #e8f1fc;
+    --green: #16a34a; --green-light: #f0fdf4; --green-border: #86efac;
+    --red: #dc2626; --red-light: #fef2f2; --red-border: #fca5a5;
+    --orange: #ea580c; --orange-light: #fff7ed; --orange-border: #fed7aa;
+    --gray: #6b7280; --border: #e5e7eb; --bg: #f3f4f6;
+    --card: #ffffff; --text: #111827; --text-muted: #6b7280; --radius: 14px;
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); }
+
+  /* HEADER */
+  .header { background: #0f172a; color: #fff; padding: 20px 16px 24px; text-align: center; }
+  .oficina-logo { font-size: 28px; margin-bottom: 8px; }
+  .oficina-nome { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .header-sub { font-size: 13px; color: #94a3b8; }
+
+  /* HERO VEÍCULO */
+  .hero { background: #1e293b; color: #fff; padding: 16px; margin: 0; }
+  .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+  .hero-item { background: rgba(255,255,255,0.07); border-radius: 10px; padding: 10px 12px; }
+  .hero-item .label { font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
+  .hero-item .val { font-size: 15px; font-weight: 600; margin-top: 2px; }
+  .badge-status { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-top: 8px; }
+  .status-pendente { background: #fef3c7; color: #92400e; }
+  .status-visualizado { background: #dbeafe; color: #1e40af; }
+  .status-aprovado_total { background: #dcfce7; color: #166534; }
+  .status-aprovado_parcial { background: #fff7ed; color: #9a3412; }
+  .status-recusado { background: #fee2e2; color: #991b1b; }
+
+  /* PROGRESS */
+  .progress-bar { height: 4px; background: #e5e7eb; border-radius: 2px; margin: 0 16px 0; }
+  .progress-fill { height: 100%; background: var(--green); border-radius: 2px; transition: width 0.5s ease; }
+
+  /* SEÇÕES */
+  .section-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; padding: 20px 16px 8px; }
+
+  /* CARDS DE ITEM */
+  .item-card { background: var(--card); border-radius: var(--radius); margin: 0 12px 14px; overflow: hidden; border: 1.5px solid var(--border); transition: border-color 0.3s; }
+  .item-card.aprovado { border-color: var(--green-border); }
+  .item-card.recusado { border-color: var(--red-border); }
+
+  .item-top { padding: 14px 16px 10px; }
+  .item-header-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+  .item-titulo { font-size: 16px; font-weight: 700; flex: 1; padding-right: 8px; }
+  .urgencia-badge { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; flex-shrink: 0; }
+  .urg-urgente { background: var(--red-light); color: var(--red); }
+  .urg-recomendado { background: var(--orange-light); color: var(--orange); }
+  .urg-normal { background: var(--green-light); color: var(--green); }
+
+  .item-desc { font-size: 14px; color: var(--text-muted); line-height: 1.5; margin-bottom: 12px; }
+
+  /* FOTO */
+  .item-foto { width: 100%; max-height: 240px; object-fit: cover; display: block; cursor: pointer; }
+
+  /* ÁUDIO */
+  .audio-wrapper { padding: 12px 16px; background: #f8fafc; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .audio-label { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+  .audio-label span { background: var(--blue-light); color: var(--blue); padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  audio { width: 100%; height: 36px; }
+
+  /* PREÇOS */
+  .item-precos { padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; }
+  .precos-detail { font-size: 12px; color: var(--text-muted); }
+  .preco-total { font-size: 22px; font-weight: 800; color: var(--text); }
+
+  /* BOTÕES DE APROVAÇÃO */
+  .item-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border-top: 1px solid var(--border); }
+  .btn-action { padding: 14px 8px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.15s; }
+  .btn-aprovar { background: var(--green-light); color: var(--green); border-right: 1px solid var(--border); }
+  .btn-aprovar:hover { background: #dcfce7; }
+  .btn-recusar { background: var(--red-light); color: var(--red); }
+  .btn-recusar:hover { background: #fee2e2; }
+  .btn-action.selected-aprovado { background: var(--green); color: #fff; }
+  .btn-action.selected-recusado { background: var(--red); color: #fff; }
+  .btn-action:disabled { opacity: 0.7; cursor: default; }
+
+  /* ESTADO FINAL DO ITEM */
+  .item-status-bar { padding: 10px 16px; font-size: 13px; font-weight: 600; display: none; align-items: center; gap: 8px; }
+  .item-status-bar.show { display: flex; }
+  .item-status-bar.aprovado { background: var(--green-light); color: var(--green); }
+  .item-status-bar.recusado { background: var(--red-light); color: var(--red); }
+
+  /* RESUMO TOTAL */
+  .resumo { background: var(--card); border-radius: var(--radius); margin: 0 12px 16px; overflow: hidden; border: 1px solid var(--border); }
+  .resumo-row { display: flex; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 14px; }
+  .resumo-row:last-child { border-bottom: none; }
+  .resumo-total { font-size: 18px; font-weight: 800; }
+  .resumo-aprovado { color: var(--green); }
+
+  /* BOTÃO CONFIRMAR TUDO */
+  .footer-cta { padding: 16px; }
+  .btn-confirmar { width: 100%; padding: 16px; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+  .btn-confirmar.enabled { background: var(--green); color: #fff; }
+  .btn-confirmar.enabled:hover { background: #15803d; }
+  .btn-confirmar.disabled { background: #e5e7eb; color: var(--gray); cursor: not-allowed; }
+
+  /* LIGHTBOX FOTO */
+  .lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 999; align-items: center; justify-content: center; }
+  .lightbox.open { display: flex; }
+  .lightbox img { max-width: 95vw; max-height: 90vh; object-fit: contain; border-radius: 8px; }
+  .lightbox-close { position: absolute; top: 16px; right: 16px; width: 40px; height: 40px; background: rgba(255,255,255,0.15); border: none; border-radius: 50%; color: #fff; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+  /* LOADING */
+  .loading { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; gap: 16px; }
+  .spinner { width: 40px; height: 40px; border: 3px solid #e5e7eb; border-top-color: var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* CONFIRMAÇÃO ENVIADA */
+  .confirmado { display: none; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; text-align: center; gap: 12px; }
+  .confirmado.show { display: flex; }
+  .confirmado-icon { font-size: 64px; }
+  .confirmado h2 { font-size: 22px; font-weight: 700; }
+  .confirmado p { color: var(--text-muted); font-size: 14px; max-width: 280px; }
+
+  /* TOAST */
+  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #1f2937; color: #fff; padding: 12px 20px; border-radius: 10px; font-size: 14px; z-index: 9999; display: none; white-space: nowrap; }
+  .toast.show { display: block; }
+</style>
+</head>
+<body>
+
+<!-- CONFIGURAÇÃO -->
+<script>
+const SUPABASE_URL = 'https://afaovhhtrrfmdyqxxkdy.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmYW92aGh0cnJmbWR5cXh4a2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNjA1MjYsImV4cCI6MjA5NjczNjUyNn0.tCdeOxprpPwbJLchm65tC5TQU2rIw8UQht6LJNoEgyk';
+</script>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <img id="lightbox-img" src="">
+</div>
+
+<div id="loading" class="loading">
+  <div class="spinner"></div>
+  <p style="color:var(--text-muted);font-size:14px">Carregando orçamento...</p>
+</div>
+
+<div id="app" style="display:none">
+  <!-- HEADER -->
+  <div class="header">
+    <div class="oficina-logo">🔧</div>
+    <div class="oficina-nome" id="h-oficina">Oficina</div>
+    <div class="header-sub" id="h-mecanico"></div>
+  </div>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div style="font-size:13px;color:#94a3b8;margin-bottom:4px">Orçamento para</div>
+    <div style="font-size:20px;font-weight:700" id="h-cliente"></div>
+    <div class="hero-grid">
+      <div class="hero-item"><div class="label">Veículo</div><div class="val" id="h-veiculo"></div></div>
+      <div class="hero-item"><div class="label">Placa</div><div class="val" id="h-placa"></div></div>
+      <div class="hero-item"><div class="label">Ano / KM</div><div class="val" id="h-anokm"></div></div>
+      <div class="hero-item"><div class="label">Mecânico</div><div class="val" id="h-mec"></div></div>
+    </div>
+    <div style="margin-top:12px"><span class="badge-status" id="h-status"></span></div>
+  </div>
+
+  <!-- PROGRESSO -->
+  <div style="padding:12px 16px 0">
+    <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-muted);margin-bottom:6px">
+      <span id="prog-label">0 de 0 itens respondidos</span>
+      <span id="prog-pct">0%</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+  </div>
+
+  <!-- ITENS -->
+  <div class="section-label">Itens encontrados</div>
+  <div id="itens-container"></div>
+
+  <!-- RESUMO -->
+  <div class="section-label">Resumo</div>
+  <div class="resumo" id="resumo-container"></div>
+
+  <!-- OBSERVAÇÕES -->
+  <div id="obs-section" style="display:none">
+    <div class="section-label">Observações do mecânico</div>
+    <div style="background:var(--card);border-radius:var(--radius);margin:0 12px 16px;padding:14px 16px;border:1px solid var(--border);font-size:14px;line-height:1.6;color:var(--text-muted)" id="obs-text"></div>
+  </div>
+
+  <!-- CTA -->
+  <div class="footer-cta">
+    <button class="btn-confirmar disabled" id="btn-confirmar" onclick="confirmarTudo()">
+      Revise todos os itens para confirmar
+    </button>
+  </div>
+
+  <!-- CONFIRMADO -->
+  <div class="confirmado" id="confirmado">
+    <div class="confirmado-icon">✅</div>
+    <h2>Resposta enviada!</h2>
+    <p>A oficina recebeu sua aprovação e entrará em contato em breve.</p>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// ESTADO
+// ============================================================
+let orcamento = null;
+let itens = [];
+let respostas = {};
+
+// ============================================================
+// INICIALIZAÇÃO
+// ============================================================
+async function init() {
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('token');
+  if (!token) return showError('Link inválido ou expirado.');
+
+  try {
+    // Buscar orçamento pelo token
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/orcamentos?link_token=eq.${token}&select=*`, {
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+    });
+    const data = await res.json();
+    if (!data || data.length === 0) return showError('Orçamento não encontrado.');
+    orcamento = data[0];
+
+    // Buscar itens
+    const resItens = await fetch(`${SUPABASE_URL}/rest/v1/itens_orcamento?orcamento_id=eq.${orcamento.id}&order=ordem.asc`, {
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+    });
+    itens = await resItens.json();
+
+    // Marcar como visualizado
+    if (orcamento.status === 'pendente') {
+      await fetch(`${SUPABASE_URL}/rest/v1/orcamentos?id=eq.${orcamento.id}`, {
+        method: 'PATCH',
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'visualizado' })
+      });
+    }
+
+    renderPage();
+  } catch(e) {
+    showError('Erro ao carregar orçamento.');
+  }
+}
+
+// ============================================================
+// RENDER
+// ============================================================
+function renderPage() {
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+
+  document.getElementById('h-oficina').textContent = orcamento.oficina_nome || 'Oficina';
+  document.getElementById('h-mecanico').textContent = 'Mecânico: ' + orcamento.mecanico_nome;
+  document.getElementById('h-cliente').textContent = orcamento.cliente_nome;
+  document.getElementById('h-veiculo').textContent = `${orcamento.veiculo_marca} ${orcamento.veiculo_modelo}`;
+  document.getElementById('h-placa').textContent = orcamento.veiculo_placa;
+  document.getElementById('h-anokm').textContent = [orcamento.veiculo_ano, orcamento.veiculo_km ? orcamento.veiculo_km + ' km' : null].filter(Boolean).join(' · ') || '-';
+  document.getElementById('h-mec').textContent = orcamento.mecanico_nome;
+  renderStatus(orcamento.status);
+
+  if (orcamento.observacoes) {
+    document.getElementById('obs-section').style.display = 'block';
+    document.getElementById('obs-text').textContent = orcamento.observacoes;
+  }
+
+  renderItens();
+  atualizarResumo();
+  atualizarProgresso();
+}
+
+function renderStatus(s) {
+  const labels = {
+    pendente: '⏳ Aguardando resposta',
+    visualizado: '👀 Visualizado — aguardando aprovação',
+    aprovado_total: '✅ Aprovado totalmente',
+    aprovado_parcial: '✅ Aprovado parcialmente',
+    recusado: '❌ Recusado'
+  };
+  const el = document.getElementById('h-status');
+  el.textContent = labels[s] || s;
+  el.className = 'badge-status status-' + s;
+}
+
+function renderItens() {
+  const c = document.getElementById('itens-container');
+  c.innerHTML = '';
+  itens.forEach((item, i) => {
+    const jaRespondido = item.aprovado !== null && item.aprovado !== undefined;
+    if (jaRespondido) respostas[item.id] = item.aprovado;
+
+    const urgMap = { urgente: ['urg-urgente', '🔴 Urgente'], recomendado: ['urg-recomendado', '🟡 Recomendado'], normal: ['urg-normal', '🟢 Normal'] };
+    const [urgClass, urgLabel] = urgMap[item.urgencia] || urgMap.normal;
+
+    const div = document.createElement('div');
+    div.className = 'item-card' + (jaRespondido ? (item.aprovado ? ' aprovado' : ' recusado') : '');
+    div.id = 'icard_' + item.id;
+
+    let fotoHtml = '';
+    if (item.foto_url) {
+      fotoHtml = `<img class="item-foto" src="${item.foto_url}" alt="Foto da avaria" onclick="openLightbox('${item.foto_url}')">`;
+    }
+
+    let audioHtml = '';
+    if (item.audio_url) {
+      audioHtml = `<div class="audio-wrapper">
+        <div class="audio-label"><span>🎙️ Áudio</span> Explicação do mecânico</div>
+        <audio controls src="${item.audio_url}"></audio>
+      </div>`;
+    }
+
+    const pTotal = (parseFloat(item.valor_pecas) || 0) + (parseFloat(item.valor_mao_obra) || 0);
+    const detPecas = parseFloat(item.valor_pecas) > 0 ? `Peças: R$ ${parseFloat(item.valor_pecas).toFixed(2).replace('.',',')}` : '';
+    const detMO = parseFloat(item.valor_mao_obra) > 0 ? `M.O.: R$ ${parseFloat(item.valor_mao_obra).toFixed(2).replace('.',',')}` : '';
+
+    const aprovBtn = jaRespondido && item.aprovado ? 'selected-aprovado' : '';
+    const recBtn = jaRespondido && !item.aprovado ? 'selected-recusado' : '';
+    const dis = jaRespondido ? 'disabled' : '';
+
+    div.innerHTML = `
+      <div class="item-top">
+        <div class="item-header-row">
+          <div class="item-titulo">${item.titulo}</div>
+          <span class="urgencia-badge ${urgClass}">${urgLabel}</span>
+        </div>
+        ${item.descricao ? `<div class="item-desc">${item.descricao}</div>` : ''}
+      </div>
+      ${fotoHtml}
+      ${audioHtml}
+      <div class="item-precos">
+        <div class="precos-detail">${[detPecas, detMO].filter(Boolean).join(' · ')}</div>
+        <div class="preco-total">R$ ${pTotal.toFixed(2).replace('.', ',')}</div>
+      </div>
+      <div class="item-actions">
+        <button class="btn-action btn-aprovar ${aprovBtn}" id="btn-apr-${item.id}" onclick="responder('${item.id}', true)" ${dis}>
+          ✅ Aprovar
+        </button>
+        <button class="btn-action btn-recusar ${recBtn}" id="btn-rec-${item.id}" onclick="responder('${item.id}', false)" ${dis}>
+          ❌ Recusar
+        </button>
+      </div>
+      <div class="item-status-bar ${jaRespondido ? 'show ' + (item.aprovado ? 'aprovado' : 'recusado') : ''}" id="ibar_${item.id}">
+        ${jaRespondido ? (item.aprovado ? '✅ Aprovado' : '❌ Recusado') : ''}
+      </div>`;
+    c.appendChild(div);
+  });
+}
+
+// ============================================================
+// APROVAÇÃO
+// ============================================================
+async function responder(itemId, aprovado) {
+  respostas[itemId] = aprovado;
+
+  // UI imediata
+  const card = document.getElementById('icard_' + itemId);
+  const bar = document.getElementById('ibar_' + itemId);
+  card.classList.toggle('aprovado', aprovado);
+  card.classList.toggle('recusado', !aprovado);
+  document.getElementById('btn-apr-' + itemId).classList.toggle('selected-aprovado', aprovado);
+  document.getElementById('btn-rec-' + itemId).classList.toggle('selected-recusado', !aprovado);
+  document.getElementById('btn-apr-' + itemId).disabled = true;
+  document.getElementById('btn-rec-' + itemId).disabled = true;
+  bar.className = 'item-status-bar show ' + (aprovado ? 'aprovado' : 'recusado');
+  bar.textContent = aprovado ? '✅ Aprovado' : '❌ Recusado';
+
+  // Salvar no Supabase
+  await fetch(`${SUPABASE_URL}/rest/v1/itens_orcamento?id=eq.${itemId}`, {
+    method: 'PATCH',
+    headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ aprovado: aprovado, aprovado_em: new Date().toISOString() })
+  });
+
+  atualizarResumo();
+  atualizarProgresso();
+}
+
+async function confirmarTudo() {
+  const btn = document.getElementById('btn-confirmar');
+  if (btn.classList.contains('disabled')) return;
+  btn.textContent = 'Enviando...';
+  btn.disabled = true;
+
+  const aprovados = Object.values(respostas).filter(Boolean).length;
+  const total = Object.keys(respostas).length;
+  let novoStatus = aprovados === total ? 'aprovado_total' : aprovados === 0 ? 'recusado' : 'aprovado_parcial';
+
+  await fetch(`${SUPABASE_URL}/rest/v1/orcamentos?id=eq.${orcamento.id}`, {
+    method: 'PATCH',
+    headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status: novoStatus })
+  });
+
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('confirmado').classList.add('show');
+}
+
+// ============================================================
+// RESUMO E PROGRESSO
+// ============================================================
+function atualizarResumo() {
+  const total = itens.reduce((a, it) => a + (parseFloat(it.valor_pecas) || 0) + (parseFloat(it.valor_mao_obra) || 0), 0);
+  const aprovadosIds = Object.entries(respostas).filter(([,v]) => v).map(([k]) => k);
+  const aprovado = itens.filter(it => aprovadosIds.includes(it.id)).reduce((a, it) => a + (parseFloat(it.valor_pecas) || 0) + (parseFloat(it.valor_mao_obra) || 0), 0);
+
+  document.getElementById('resumo-container').innerHTML = `
+    <div class="resumo-row"><span>Total de itens</span><span>${itens.length}</span></div>
+    <div class="resumo-row"><span>Itens aprovados</span><span style="color:var(--green)">${aprovadosIds.length}</span></div>
+    <div class="resumo-row"><span>Valor total</span><span>R$ ${total.toFixed(2).replace('.',',')}</span></div>
+    <div class="resumo-row resumo-total"><span>Valor aprovado</span><span class="resumo-aprovado">R$ ${aprovado.toFixed(2).replace('.',',')}</span></div>`;
+}
+
+function atualizarProgresso() {
+  const total = itens.length;
+  const respondidos = Object.keys(respostas).length;
+  const pct = total > 0 ? Math.round((respondidos / total) * 100) : 0;
+
+  document.getElementById('prog-label').textContent = `${respondidos} de ${total} itens respondidos`;
+  document.getElementById('prog-pct').textContent = pct + '%';
+  document.getElementById('progress-fill').style.width = pct + '%';
+
+  const btn = document.getElementById('btn-confirmar');
+  if (respondidos === total && total > 0) {
+    btn.classList.remove('disabled');
+    btn.classList.add('enabled');
+    btn.textContent = 'Confirmar minha resposta ✓';
+    btn.disabled = false;
+  } else {
+    btn.classList.add('disabled');
+    btn.classList.remove('enabled');
+    btn.textContent = `Revise todos os itens (${total - respondidos} pendentes)`;
+    btn.disabled = true;
+  }
+}
+
+// ============================================================
+// LIGHTBOX E TOAST
+// ============================================================
+function openLightbox(src) {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox').classList.add('open');
+}
+function closeLightbox() { document.getElementById('lightbox').classList.remove('open'); }
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+function showError(msg) {
+  document.getElementById('loading').innerHTML = `<p style="color:var(--red);text-align:center;padding:20px">${msg}</p>`;
+}
+
+// ============================================================
+// INICIALIZAR
+// ============================================================
+init();
+</script>
+</body>
+</html>

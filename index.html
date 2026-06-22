@@ -129,8 +129,9 @@ const WHATSAPP_API_KEY = '0054D07FDB0B-4454-8EE2-EB25141F0C9B';
       <input type="text" id="cliente_nome" placeholder="Ej: Juan García">
     </div>
     <div class="field">
-      <label>WhatsApp <span>*</span></label>
-      <input type="tel" id="cliente_telefone" placeholder="600 000 000">
+  <label>WhatsApp <span>*</span></label>
+  <input type="tel" id="cliente_telefone" placeholder="Ex: 34600123456 o 5549991329746">
+  <small style="color:var(--text-muted);font-size:12px;margin-top:4px;display:block">Incluye el código de país sin el +</small>
     </div>
     <div class="field">
       <label>Email</label>
@@ -533,8 +534,7 @@ function calcTotalGeral() {
 }
 
 async function enviarWhatsApp(telefone, nome, link, veiculo) {
-  const numeroLimpo = telefone.replace(/\D/g, '');
-  const numero = numeroLimpo.startsWith('34') ? numeroLimpo : '34' + numeroLimpo;
+  const numero = telefone.replace(/\D/g, '');
   const mensaje = `¡Hola ${nome}! 👋\n\nTu vehículo *${veiculo}* ha sido inspeccionado en Full Coches.\n\nAccede al informe completo con fotos y explicaciones del mecánico:\n\n🔗 ${link}\n\n_Puedes aprobar o rechazar cada servicio individualmente._`;
   await fetch(`${WHATSAPP_API_URL}/message/sendText/${WHATSAPP_INSTANCE}`, {
     method: 'POST',

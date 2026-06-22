@@ -1,136 +1,176 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Orçamento Digital</title>
+<title>Informe de Diagnóstico</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --blue: #1a6fd4; --blue-light: #e8f1fc;
     --green: #16a34a; --green-light: #f0fdf4; --green-border: #86efac;
     --red: #dc2626; --red-light: #fef2f2; --red-border: #fca5a5;
-    --orange: #ea580c; --orange-light: #fff7ed; --orange-border: #fed7aa;
-    --gray: #6b7280; --border: #e5e7eb; --bg: #f3f4f6;
-    --card: #ffffff; --text: #111827; --text-muted: #6b7280; --radius: 14px;
+    --orange: #d97706; --orange-light: #fffbeb; --orange-border: #fcd34d;
+    --blue: #2563eb; --blue-light: #eff6ff;
+    --border: #e5e7eb; --bg: #f9fafb;
+    --card: #ffffff; --text: #111827; --text-muted: #6b7280;
+    --radius: 14px;
   }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); max-width: 480px; margin: 0 auto; }
 
   /* HEADER */
-  .header { background: #0f172a; color: #fff; padding: 20px 16px 24px; text-align: center; }
-  .oficina-logo { font-size: 28px; margin-bottom: 8px; }
-  .oficina-nome { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
-  .header-sub { font-size: 13px; color: #94a3b8; }
+  .header { background: #fff; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+  .header-left { display: flex; align-items: center; gap: 10px; }
+  .header-icon { width: 38px; height: 38px; background: var(--green-light); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+  .header-taller { font-size: 15px; font-weight: 700; }
+  .header-ciudad { font-size: 12px; color: var(--text-muted); }
+  .demo-badge { background: var(--green-light); color: var(--green); font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; border: 1px solid var(--green-border); }
 
-  /* HERO VEÍCULO */
-  .hero { background: #1e293b; color: #fff; padding: 16px; margin: 0; }
-  .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
-  .hero-item { background: rgba(255,255,255,0.07); border-radius: 10px; padding: 10px 12px; }
-  .hero-item .label { font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
-  .hero-item .val { font-size: 15px; font-weight: 600; margin-top: 2px; }
-  .badge-status { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-top: 8px; }
-  .status-pendente { background: #fef3c7; color: #92400e; }
-  .status-visualizado { background: #dbeafe; color: #1e40af; }
-  .status-aprovado_total { background: #dcfce7; color: #166534; }
-  .status-aprovado_parcial { background: #fff7ed; color: #9a3412; }
-  .status-recusado { background: #fee2e2; color: #991b1b; }
+  /* HERO */
+  .hero { padding: 24px 20px 16px; }
+  .hero-eyebrow { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
+  .hero-nombre { font-size: 30px; font-weight: 800; margin-bottom: 12px; }
+  .hero-tags { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .tag-placa { background: #1e293b; color: #fff; font-size: 13px; font-weight: 700; padding: 5px 12px; border-radius: 8px; letter-spacing: 1px; }
+  .tag-vehiculo { font-size: 14px; color: var(--text-muted); font-weight: 500; }
 
-  /* PROGRESS */
-  .progress-bar { height: 4px; background: #e5e7eb; border-radius: 2px; margin: 0 16px 0; }
-  .progress-fill { height: 100%; background: var(--green); border-radius: 2px; transition: width 0.5s ease; }
+  /* CONTADORES */
+  .contadores { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 20px 20px; }
+  .contador { border-radius: var(--radius); padding: 18px 16px; text-align: center; }
+  .contador-urgente { background: var(--red-light); border: 1px solid var(--red-border); }
+  .contador-vigilar { background: var(--orange-light); border: 1px solid var(--orange-border); }
+  .contador-num { font-size: 40px; font-weight: 900; line-height: 1; }
+  .contador-urgente .contador-num { color: var(--red); }
+  .contador-vigilar .contador-num { color: var(--orange); }
+  .contador-label { font-size: 13px; font-weight: 600; margin-top: 4px; }
+  .contador-urgente .contador-label { color: var(--red); }
+  .contador-vigilar .contador-label { color: var(--orange); }
 
-  /* SEÇÕES */
-  .section-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; padding: 20px 16px 8px; }
+  /* AUDIO GENERAL */
+  .audio-general { margin: 0 20px 20px; background: #fff; border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; }
+  .audio-general-header { padding: 12px 16px 8px; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; }
+  .audio-general audio { width: 100%; padding: 0 16px 12px; display: block; }
 
-  /* CARDS DE ITEM */
-  .item-card { background: var(--card); border-radius: var(--radius); margin: 0 12px 14px; overflow: hidden; border: 1.5px solid var(--border); transition: border-color 0.3s; }
+  /* SECTION LABEL */
+  .section-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; padding: 4px 20px 12px; }
+
+  /* ITEM CARD */
+  .item-card { background: #fff; border-radius: var(--radius); margin: 0 20px 16px; overflow: hidden; border: 1.5px solid var(--border); transition: border-color 0.2s; }
   .item-card.aprovado { border-color: var(--green-border); }
   .item-card.recusado { border-color: var(--red-border); }
+  .item-card.vigilar { border-left: 4px solid var(--orange); }
+  .item-card.urgente { border-left: 4px solid var(--red); }
 
-  .item-top { padding: 14px 16px 10px; }
-  .item-header-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
-  .item-titulo { font-size: 16px; font-weight: 700; flex: 1; padding-right: 8px; }
-  .urgencia-badge { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; flex-shrink: 0; }
+  .item-body { padding: 16px; }
+  .item-header-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .item-titulo { font-size: 15px; font-weight: 700; flex: 1; text-transform: uppercase; letter-spacing: 0.3px; }
+  .urg-badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; }
   .urg-urgente { background: var(--red-light); color: var(--red); }
   .urg-recomendado { background: var(--orange-light); color: var(--orange); }
   .urg-normal { background: var(--green-light); color: var(--green); }
 
-  .item-desc { font-size: 14px; color: var(--text-muted); line-height: 1.5; margin-bottom: 12px; }
+  .item-desc { font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: 12px; }
+
+  /* ALERTA SI NO REPARA */
+  .alerta-costo { background: #fffbeb; border: 1px solid #fcd34d; border-radius: 10px; padding: 10px 14px; margin-bottom: 12px; font-size: 13px; color: #92400e; line-height: 1.5; }
+  .alerta-costo strong { color: #78350f; }
 
   /* FOTO */
-  .item-foto { width: 100%; max-height: 240px; object-fit: cover; display: block; cursor: pointer; }
+  .item-foto { width: 100%; max-height: 220px; object-fit: cover; display: block; cursor: pointer; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
 
-  /* ÁUDIO */
-  .audio-wrapper { padding: 12px 16px; background: #f8fafc; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-  .audio-label { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
-  .audio-label span { background: var(--blue-light); color: var(--blue); padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
-  audio { width: 100%; height: 36px; }
+  /* AUDIO ITEM */
+  .audio-item { padding: 12px 16px; background: var(--blue-light); border-top: 1px solid var(--border); }
+  .audio-item-label { font-size: 11px; font-weight: 700; color: var(--blue); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .audio-item audio { width: 100%; }
 
-  /* PREÇOS */
-  .item-precos { padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; }
-  .precos-detail { font-size: 12px; color: var(--text-muted); }
-  .preco-total { font-size: 22px; font-weight: 800; color: var(--text); }
+  /* PRECIO */
+  .item-precio { padding: 14px 16px; display: flex; align-items: baseline; justify-content: space-between; border-top: 1px solid var(--border); }
+  .precio-valor { font-size: 26px; font-weight: 900; }
+  .precio-iva { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
 
-  /* BOTÕES DE APROVAÇÃO */
-  .item-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border-top: 1px solid var(--border); }
-  .btn-action { padding: 14px 8px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.15s; }
-  .btn-aprovar { background: var(--green-light); color: var(--green); border-right: 1px solid var(--border); }
-  .btn-aprovar:hover { background: #dcfce7; }
-  .btn-recusar { background: var(--red-light); color: var(--red); }
-  .btn-recusar:hover { background: #fee2e2; }
-  .btn-action.selected-aprovado { background: var(--green); color: #fff; }
-  .btn-action.selected-recusado { background: var(--red); color: #fff; }
-  .btn-action:disabled { opacity: 0.7; cursor: default; }
+  /* BOTON APROBAR */
+  .btn-aprobar { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 14px; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.15s; background: var(--green); color: #fff; margin-top: 2px; }
+  .btn-aprobar:hover { background: #15803d; }
+  .btn-aprobar.aprobado { background: var(--green); opacity: 0.85; cursor: default; }
+  .btn-aprobar.rechazado-btn { background: #e5e7eb; color: var(--text-muted); cursor: default; }
 
-  /* ESTADO FINAL DO ITEM */
-  .item-status-bar { padding: 10px 16px; font-size: 13px; font-weight: 600; display: none; align-items: center; gap: 8px; }
+  /* BOTON RECHAZAR */
+  .btn-rechazar { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; padding: 10px; border: none; background: transparent; color: var(--red); font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 4px; }
+  .btn-rechazar:hover { text-decoration: underline; }
+  .btn-rechazar.hidden { display: none; }
+
+  /* MODAL MOTIVO */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 500; align-items: flex-end; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: #fff; border-radius: 20px 20px 0 0; padding: 24px 20px; width: 100%; max-width: 480px; }
+  .modal h3 { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+  .modal p { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
+  .modal textarea { width: 100%; border: 1.5px solid var(--border); border-radius: 10px; padding: 12px; font-size: 14px; resize: none; min-height: 100px; font-family: inherit; outline: none; }
+  .modal textarea:focus { border-color: var(--red); }
+  .modal-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+  .modal-btn { padding: 13px; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; }
+  .modal-btn-cancel { background: var(--bg); color: var(--text); }
+  .modal-btn-confirm { background: var(--red); color: #fff; }
+
+  /* STATUS BAR */
+  .item-status-bar { padding: 10px 16px; font-size: 13px; font-weight: 600; display: none; align-items: center; gap: 8px; border-top: 1px solid var(--border); }
   .item-status-bar.show { display: flex; }
   .item-status-bar.aprovado { background: var(--green-light); color: var(--green); }
   .item-status-bar.recusado { background: var(--red-light); color: var(--red); }
 
-  /* RESUMO TOTAL */
-  .resumo { background: var(--card); border-radius: var(--radius); margin: 0 12px 16px; overflow: hidden; border: 1px solid var(--border); }
-  .resumo-row { display: flex; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 14px; }
-  .resumo-row:last-child { border-bottom: none; }
-  .resumo-total { font-size: 18px; font-weight: 800; }
-  .resumo-aprovado { color: var(--green); }
+  /* RESUMEN */
+  .resumen { background: #fff; border-radius: var(--radius); margin: 0 20px 16px; border: 1px solid var(--border); overflow: hidden; }
+  .resumen-row { display: flex; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 14px; color: var(--text-muted); }
+  .resumen-row:last-child { border-bottom: none; }
+  .resumen-total-row { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: var(--bg); }
+  .resumen-total-label { font-size: 15px; font-weight: 700; }
+  .resumen-total-valor { font-size: 28px; font-weight: 900; }
 
-  /* BOTÃO CONFIRMAR TUDO */
-  .footer-cta { padding: 16px; }
+  /* PROGRESO */
+  .progreso-wrap { padding: 0 20px 16px; }
+  .progreso-info { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
+  .progreso-bar { height: 5px; background: var(--border); border-radius: 3px; }
+  .progreso-fill { height: 100%; background: var(--green); border-radius: 3px; transition: width 0.4s ease; }
+
+  /* CTA */
+  .footer-cta { padding: 16px 20px 32px; }
   .btn-confirmar { width: 100%; padding: 16px; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
   .btn-confirmar.enabled { background: var(--green); color: #fff; }
   .btn-confirmar.enabled:hover { background: #15803d; }
-  .btn-confirmar.disabled { background: #e5e7eb; color: var(--gray); cursor: not-allowed; }
+  .btn-confirmar.disabled { background: #e5e7eb; color: var(--text-muted); cursor: not-allowed; }
 
-  /* LIGHTBOX FOTO */
-  .lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 999; align-items: center; justify-content: center; }
+  /* LIGHTBOX */
+  .lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.93); z-index: 999; align-items: center; justify-content: center; }
   .lightbox.open { display: flex; }
   .lightbox img { max-width: 95vw; max-height: 90vh; object-fit: contain; border-radius: 8px; }
   .lightbox-close { position: absolute; top: 16px; right: 16px; width: 40px; height: 40px; background: rgba(255,255,255,0.15); border: none; border-radius: 50%; color: #fff; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
   /* LOADING */
-  .loading { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; gap: 16px; }
-  .spinner { width: 40px; height: 40px; border: 3px solid #e5e7eb; border-top-color: var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  .loading { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; gap: 16px; }
+  .spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--green); border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* CONFIRMAÇÃO ENVIADA */
-  .confirmado { display: none; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; text-align: center; gap: 12px; }
+  /* CONFIRMADO */
+  .confirmado { display: none; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; text-align: center; gap: 14px; min-height: 80vh; }
   .confirmado.show { display: flex; }
-  .confirmado-icon { font-size: 64px; }
-  .confirmado h2 { font-size: 22px; font-weight: 700; }
-  .confirmado p { color: var(--text-muted); font-size: 14px; max-width: 280px; }
+  .confirmado-icon { font-size: 72px; }
+  .confirmado h2 { font-size: 24px; font-weight: 800; }
+  .confirmado p { color: var(--text-muted); font-size: 15px; max-width: 280px; line-height: 1.6; }
 
   /* TOAST */
-  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #1f2937; color: #fff; padding: 12px 20px; border-radius: 10px; font-size: 14px; z-index: 9999; display: none; white-space: nowrap; }
+  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #1f2937; color: #fff; padding: 12px 20px; border-radius: 10px; font-size: 14px; z-index: 9999; display: none; }
   .toast.show { display: block; }
+
+  /* OBS */
+  .obs-box { margin: 0 20px 20px; background: var(--green-light); border: 1px solid var(--green-border); border-radius: var(--radius); padding: 14px 16px; font-size: 14px; color: #166534; line-height: 1.6; }
+  .obs-box::before { content: "✓ "; font-weight: 700; }
 </style>
 </head>
 <body>
 
-<!-- CONFIGURAÇÃO -->
 <script>
 const SUPABASE_URL = 'https://afaovhhtrrfmdyqxxkdy.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmYW92aGh0cnJmbWR5cXh4a2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNjA1MjYsImV4cCI6MjA5NjczNjUyNn0.tCdeOxprpPwbJLchm65tC5TQU2rIw8UQht6LJNoEgyk';
+const IVA = 0.21;
 </script>
 
 <!-- LIGHTBOX -->
@@ -139,106 +179,123 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
   <img id="lightbox-img" src="">
 </div>
 
+<!-- MODAL MOTIVO RECHAZO -->
+<div class="modal-overlay" id="modal-rechazo">
+  <div class="modal">
+    <h3>¿Por qué rechazas este servicio?</h3>
+    <p>Tu opinión ayuda al taller a entender tus necesidades.</p>
+    <textarea id="motivo-text" placeholder="Ej: Lo haré en otro momento, ya lo revisé, precio elevado..."></textarea>
+    <div class="modal-btns">
+      <button class="modal-btn modal-btn-cancel" onclick="cerrarModal()">Cancelar</button>
+      <button class="modal-btn modal-btn-confirm" onclick="confirmarRechazo()">Rechazar</button>
+    </div>
+  </div>
+</div>
+
 <div id="loading" class="loading">
   <div class="spinner"></div>
-  <p style="color:var(--text-muted);font-size:14px">Carregando orçamento...</p>
+  <p style="color:var(--text-muted);font-size:14px">Cargando informe...</p>
 </div>
 
 <div id="app" style="display:none">
   <!-- HEADER -->
   <div class="header">
-    <div class="oficina-logo">🔧</div>
-    <div class="oficina-nome" id="h-oficina">Oficina</div>
-    <div class="header-sub" id="h-mecanico"></div>
+    <div class="header-left">
+      <div class="header-icon">🔧</div>
+      <div>
+        <div class="header-taller" id="h-oficina">Taller</div>
+        <div class="header-ciudad" id="h-ciudad">España</div>
+      </div>
+    </div>
   </div>
 
   <!-- HERO -->
   <div class="hero">
-    <div style="font-size:13px;color:#94a3b8;margin-bottom:4px">Orçamento para</div>
-    <div style="font-size:20px;font-weight:700" id="h-cliente"></div>
-    <div class="hero-grid">
-      <div class="hero-item"><div class="label">Veículo</div><div class="val" id="h-veiculo"></div></div>
-      <div class="hero-item"><div class="label">Placa</div><div class="val" id="h-placa"></div></div>
-      <div class="hero-item"><div class="label">Ano / KM</div><div class="val" id="h-anokm"></div></div>
-      <div class="hero-item"><div class="label">Mecânico</div><div class="val" id="h-mec"></div></div>
+    <div class="hero-eyebrow">Informe de diagnóstico</div>
+    <div class="hero-nombre" id="h-cliente"></div>
+    <div class="hero-tags">
+      <span class="tag-placa" id="h-placa"></span>
+      <span class="tag-vehiculo" id="h-vehiculo"></span>
     </div>
-    <div style="margin-top:12px"><span class="badge-status" id="h-status"></span></div>
   </div>
 
-  <!-- PROGRESSO -->
-  <div style="padding:12px 16px 0">
-    <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-muted);margin-bottom:6px">
-      <span id="prog-label">0 de 0 itens respondidos</span>
+  <!-- CONTADORES -->
+  <div class="contadores">
+    <div class="contador contador-urgente">
+      <div class="contador-num" id="cnt-urgente">0</div>
+      <div class="contador-label">Urgente</div>
+    </div>
+    <div class="contador contador-vigilar">
+      <div class="contador-num" id="cnt-vigilar">0</div>
+      <div class="contador-label">Vigilar</div>
+    </div>
+  </div>
+
+  <!-- PROGRESO -->
+  <div class="progreso-wrap">
+    <div class="progreso-info">
+      <span id="prog-label">0 de 0 elementos revisados</span>
       <span id="prog-pct">0%</span>
     </div>
-    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    <div class="progreso-bar"><div class="progreso-fill" id="progreso-fill" style="width:0%"></div></div>
   </div>
 
-  <!-- ITENS -->
-  <div class="section-label">Itens encontrados</div>
+  <!-- ITEMS -->
+  <div class="section-label">Qué hemos encontrado</div>
   <div id="itens-container"></div>
 
-  <!-- RESUMO -->
-  <div class="section-label">Resumo</div>
-  <div class="resumo" id="resumo-container"></div>
-
-  <!-- OBSERVAÇÕES -->
+  <!-- OBS -->
   <div id="obs-section" style="display:none">
-    <div class="section-label">Observações do mecânico</div>
-    <div style="background:var(--card);border-radius:var(--radius);margin:0 12px 16px;padding:14px 16px;border:1px solid var(--border);font-size:14px;line-height:1.6;color:var(--text-muted)" id="obs-text"></div>
+    <div class="obs-box" id="obs-text"></div>
   </div>
+
+  <!-- RESUMEN -->
+  <div class="section-label" style="padding-top:20px">Resumen</div>
+  <div class="resumen" id="resumen-container"></div>
 
   <!-- CTA -->
   <div class="footer-cta">
-    <button class="btn-confirmar disabled" id="btn-confirmar" onclick="confirmarTudo()">
-      Revise todos os itens para confirmar
+    <button class="btn-confirmar disabled" id="btn-confirmar" onclick="confirmarTodo()">
+      Revisa todos los elementos para confirmar
     </button>
   </div>
 
   <!-- CONFIRMADO -->
   <div class="confirmado" id="confirmado">
     <div class="confirmado-icon">✅</div>
-    <h2>Resposta enviada!</h2>
-    <p>A oficina recebeu sua aprovação e entrará em contato em breve.</p>
+    <h2>¡Respuesta enviada!</h2>
+    <p>El taller ha recibido tu aprobación y se pondrá en contacto contigo pronto.</p>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// ============================================================
-// ESTADO
-// ============================================================
-let orcamento = null;
-let itens = [];
-let respostas = {};
+let presupuesto = null;
+let items = [];
+let respuestas = {};
+let itemPendienteRechazo = null;
 
-// ============================================================
-// INICIALIZAÇÃO
-// ============================================================
 async function init() {
   const params = new URLSearchParams(window.location.search);
   const token = params.get('token');
-  if (!token) return showError('Link inválido ou expirado.');
+  if (!token) return showError('Enlace inválido o expirado.');
 
   try {
-    // Buscar orçamento pelo token
     const res = await fetch(`${SUPABASE_URL}/rest/v1/orcamentos?link_token=eq.${token}&select=*`, {
       headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
     });
     const data = await res.json();
-    if (!data || data.length === 0) return showError('Orçamento não encontrado.');
-    orcamento = data[0];
+    if (!data || data.length === 0) return showError('Presupuesto no encontrado.');
+    presupuesto = data[0];
 
-    // Buscar itens
-    const resItens = await fetch(`${SUPABASE_URL}/rest/v1/itens_orcamento?orcamento_id=eq.${orcamento.id}&order=ordem.asc`, {
+    const resItems = await fetch(`${SUPABASE_URL}/rest/v1/itens_orcamento?orcamento_id=eq.${presupuesto.id}&order=ordem.asc`, {
       headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
     });
-    itens = await resItens.json();
+    items = await resItems.json();
 
-    // Marcar como visualizado
-    if (orcamento.status === 'pendente') {
-      await fetch(`${SUPABASE_URL}/rest/v1/orcamentos?id=eq.${orcamento.id}`, {
+    if (presupuesto.status === 'pendente') {
+      await fetch(`${SUPABASE_URL}/rest/v1/orcamentos?id=eq.${presupuesto.id}`, {
         method: 'PATCH',
         headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'visualizado' })
@@ -247,203 +304,234 @@ async function init() {
 
     renderPage();
   } catch(e) {
-    showError('Erro ao carregar orçamento.');
+    showError('Error al cargar el informe.');
   }
 }
 
-// ============================================================
-// RENDER
-// ============================================================
 function renderPage() {
   document.getElementById('loading').style.display = 'none';
   document.getElementById('app').style.display = 'block';
 
-  document.getElementById('h-oficina').textContent = orcamento.oficina_nome || 'Oficina';
-  document.getElementById('h-mecanico').textContent = 'Mecânico: ' + orcamento.mecanico_nome;
-  document.getElementById('h-cliente').textContent = orcamento.cliente_nome;
-  document.getElementById('h-veiculo').textContent = `${orcamento.veiculo_marca} ${orcamento.veiculo_modelo}`;
-  document.getElementById('h-placa').textContent = orcamento.veiculo_placa;
-  document.getElementById('h-anokm').textContent = [orcamento.veiculo_ano, orcamento.veiculo_km ? orcamento.veiculo_km + ' km' : null].filter(Boolean).join(' · ') || '-';
-  document.getElementById('h-mec').textContent = orcamento.mecanico_nome;
-  renderStatus(orcamento.status);
+  document.getElementById('h-oficina').textContent = presupuesto.oficina_nome || 'Taller';
+  document.getElementById('h-ciudad').textContent = 'España';
+  document.getElementById('h-cliente').textContent = 'Hola, ' + presupuesto.cliente_nome;
+  document.getElementById('h-placa').textContent = presupuesto.veiculo_placa;
+  document.getElementById('h-vehiculo').textContent = `${presupuesto.veiculo_marca} ${presupuesto.veiculo_modelo}${presupuesto.veiculo_ano ? ' (' + presupuesto.veiculo_ano + ')' : ''}`;
 
-  if (orcamento.observacoes) {
+  const urgentes = items.filter(i => i.urgencia === 'urgente').length;
+  const vigilar = items.filter(i => i.urgencia === 'recomendado').length;
+  document.getElementById('cnt-urgente').textContent = urgentes;
+  document.getElementById('cnt-vigilar').textContent = vigilar;
+
+  if (presupuesto.observacoes) {
     document.getElementById('obs-section').style.display = 'block';
-    document.getElementById('obs-text').textContent = orcamento.observacoes;
+    document.getElementById('obs-text').textContent = presupuesto.observacoes;
   }
 
-  renderItens();
-  atualizarResumo();
-  atualizarProgresso();
+  renderItems();
+  actualizarResumen();
+  actualizarProgreso();
 }
 
-function renderStatus(s) {
-  const labels = {
-    pendente: '⏳ Aguardando resposta',
-    visualizado: '👀 Visualizado — aguardando aprovação',
-    aprovado_total: '✅ Aprovado totalmente',
-    aprovado_parcial: '✅ Aprovado parcialmente',
-    recusado: '❌ Recusado'
-  };
-  const el = document.getElementById('h-status');
-  el.textContent = labels[s] || s;
-  el.className = 'badge-status status-' + s;
-}
-
-function renderItens() {
+function renderItems() {
   const c = document.getElementById('itens-container');
   c.innerHTML = '';
-  itens.forEach((item, i) => {
-    const jaRespondido = item.aprovado !== null && item.aprovado !== undefined;
-    if (jaRespondido) respostas[item.id] = item.aprovado;
 
-    const urgMap = { urgente: ['urg-urgente', '🔴 Urgente'], recomendado: ['urg-recomendado', '🟡 Recomendado'], normal: ['urg-normal', '🟢 Normal'] };
-    const [urgClass, urgLabel] = urgMap[item.urgencia] || urgMap.normal;
+  items.forEach(item => {
+    const yaRespondido = item.aprovado !== null && item.aprovado !== undefined;
+    if (yaRespondido) respuestas[item.id] = { aprobado: item.aprovado, motivo: item.motivo_recusa };
+
+    const urgMap = {
+      urgente: ['urg-urgente', 'URGENTE', 'urgente'],
+      recomendado: ['urg-recomendado', 'VIGILAR', 'vigilar'],
+      normal: ['urg-normal', 'NORMAL', '']
+    };
+    const [urgClass, urgLabel, cardClass] = urgMap[item.urgencia] || urgMap.normal;
+
+    const precio = (parseFloat(item.valor_pecas) || 0) + (parseFloat(item.valor_mao_obra) || 0);
+    const precioIVA = precio * (1 + IVA);
 
     const div = document.createElement('div');
-    div.className = 'item-card' + (jaRespondido ? (item.aprovado ? ' aprovado' : ' recusado') : '');
+    div.className = `item-card ${cardClass}${yaRespondido ? (item.aprovado ? ' aprovado' : ' recusado') : ''}`;
     div.id = 'icard_' + item.id;
 
-    let fotoHtml = '';
-    if (item.foto_url) {
-      fotoHtml = `<img class="item-foto" src="${item.foto_url}" alt="Foto da avaria" onclick="openLightbox('${item.foto_url}')">`;
-    }
+    const fotoHtml = item.foto_url
+      ? `<img class="item-foto" src="${item.foto_url}" alt="Foto" onclick="openLightbox('${item.foto_url}')">`
+      : '';
 
-    let audioHtml = '';
-    if (item.audio_url) {
-      audioHtml = `<div class="audio-wrapper">
-        <div class="audio-label"><span>🎙️ Áudio</span> Explicação do mecânico</div>
-        <audio controls src="${item.audio_url}"></audio>
-      </div>`;
-    }
+    const audioHtml = item.audio_url
+      ? `<div class="audio-item">
+           <div class="audio-item-label">🎙 Escucha el informe</div>
+           <audio controls src="${item.audio_url}"></audio>
+         </div>`
+      : '';
 
-    const pTotal = (parseFloat(item.valor_pecas) || 0) + (parseFloat(item.valor_mao_obra) || 0);
-    const detPecas = parseFloat(item.valor_pecas) > 0 ? `Peças: R$ ${parseFloat(item.valor_pecas).toFixed(2).replace('.',',')}` : '';
-    const detMO = parseFloat(item.valor_mao_obra) > 0 ? `M.O.: R$ ${parseFloat(item.valor_mao_obra).toFixed(2).replace('.',',')}` : '';
-
-    const aprovBtn = jaRespondido && item.aprovado ? 'selected-aprovado' : '';
-    const recBtn = jaRespondido && !item.aprovado ? 'selected-recusado' : '';
-    const dis = jaRespondido ? 'disabled' : '';
+    const btnAprobadoClass = yaRespondido ? (item.aprovado ? 'aprobado' : 'rechazado-btn') : '';
+    const btnAprobadoTexto = yaRespondido && item.aprovado ? '✓ Aprobado' : (yaRespondido ? 'Rechazado' : '✓ Aprobar');
+    const btnRechazoClass = yaRespondido ? 'hidden' : '';
+    const disabledAttr = yaRespondido ? 'disabled' : '';
 
     div.innerHTML = `
-      <div class="item-top">
+      <div class="item-body">
         <div class="item-header-row">
           <div class="item-titulo">${item.titulo}</div>
-          <span class="urgencia-badge ${urgClass}">${urgLabel}</span>
+          <span class="urg-badge ${urgClass}">${urgLabel}</span>
         </div>
         ${item.descricao ? `<div class="item-desc">${item.descricao}</div>` : ''}
       </div>
       ${fotoHtml}
       ${audioHtml}
-      <div class="item-precos">
-        <div class="precos-detail">${[detPecas, detMO].filter(Boolean).join(' · ')}</div>
-        <div class="preco-total">R$ ${pTotal.toFixed(2).replace('.', ',')}</div>
+      <div class="item-precio">
+        <div>
+          <div class="precio-valor">€${precio.toFixed(2)}</div>
+          <div class="precio-iva">sin IVA · €${precioIVA.toFixed(2)} con IVA</div>
+        </div>
       </div>
-      <div class="item-actions">
-        <button class="btn-action btn-aprovar ${aprovBtn}" id="btn-apr-${item.id}" onclick="responder('${item.id}', true)" ${dis}>
-          ✅ Aprovar
+      <div style="padding:0 16px 8px">
+        <button class="btn-aprobar ${btnAprobadoClass}" id="btn-apr-${item.id}" onclick="aprobar('${item.id}')" ${disabledAttr}>
+          ${btnAprobadoTexto}
         </button>
-        <button class="btn-action btn-recusar ${recBtn}" id="btn-rec-${item.id}" onclick="responder('${item.id}', false)" ${dis}>
-          ❌ Recusar
+        <button class="btn-rechazar ${btnRechazoClass}" id="btn-rec-${item.id}" onclick="abrirModalRechazo('${item.id}')">
+          Rechazar este servicio
         </button>
       </div>
-      <div class="item-status-bar ${jaRespondido ? 'show ' + (item.aprovado ? 'aprovado' : 'recusado') : ''}" id="ibar_${item.id}">
-        ${jaRespondido ? (item.aprovado ? '✅ Aprovado' : '❌ Recusado') : ''}
+      <div class="item-status-bar ${yaRespondido ? 'show ' + (item.aprovado ? 'aprovado' : 'recusado') : ''}" id="ibar_${item.id}">
+        ${yaRespondido ? (item.aprovado ? '✅ Aprobado' : '❌ Rechazado' + (item.motivo_recusa ? ' — ' + item.motivo_recusa : '')) : ''}
       </div>`;
+
     c.appendChild(div);
   });
 }
 
-// ============================================================
-// APROVAÇÃO
-// ============================================================
-async function responder(itemId, aprovado) {
-  respostas[itemId] = aprovado;
+async function aprobar(itemId) {
+  respuestas[itemId] = { aprobado: true, motivo: null };
+  actualizarUIItem(itemId, true, null);
 
-  // UI imediata
-  const card = document.getElementById('icard_' + itemId);
-  const bar = document.getElementById('ibar_' + itemId);
-  card.classList.toggle('aprovado', aprovado);
-  card.classList.toggle('recusado', !aprovado);
-  document.getElementById('btn-apr-' + itemId).classList.toggle('selected-aprovado', aprovado);
-  document.getElementById('btn-rec-' + itemId).classList.toggle('selected-recusado', !aprovado);
-  document.getElementById('btn-apr-' + itemId).disabled = true;
-  document.getElementById('btn-rec-' + itemId).disabled = true;
-  bar.className = 'item-status-bar show ' + (aprovado ? 'aprovado' : 'recusado');
-  bar.textContent = aprovado ? '✅ Aprovado' : '❌ Recusado';
-
-  // Salvar no Supabase
   await fetch(`${SUPABASE_URL}/rest/v1/itens_orcamento?id=eq.${itemId}`, {
     method: 'PATCH',
     headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ aprovado: aprovado, aprovado_em: new Date().toISOString() })
+    body: JSON.stringify({ aprovado: true, aprovado_em: new Date().toISOString(), motivo_recusa: null })
   });
 
-  atualizarResumo();
-  atualizarProgresso();
+  actualizarResumen();
+  actualizarProgreso();
 }
 
-async function confirmarTudo() {
+function abrirModalRechazo(itemId) {
+  itemPendienteRechazo = itemId;
+  document.getElementById('motivo-text').value = '';
+  document.getElementById('modal-rechazo').classList.add('open');
+}
+
+function cerrarModal() {
+  document.getElementById('modal-rechazo').classList.remove('open');
+  itemPendienteRechazo = null;
+}
+
+async function confirmarRechazo() {
+  const motivo = document.getElementById('motivo-text').value.trim() || 'No indicado';
+  const itemId = itemPendienteRechazo;
+  cerrarModal();
+
+  respuestas[itemId] = { aprobado: false, motivo };
+  actualizarUIItem(itemId, false, motivo);
+
+  await fetch(`${SUPABASE_URL}/rest/v1/itens_orcamento?id=eq.${itemId}`, {
+    method: 'PATCH',
+    headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ aprovado: false, aprovado_em: new Date().toISOString(), motivo_recusa: motivo })
+  });
+
+  actualizarResumen();
+  actualizarProgreso();
+}
+
+function actualizarUIItem(itemId, aprobado, motivo) {
+  const card = document.getElementById('icard_' + itemId);
+  const bar = document.getElementById('ibar_' + itemId);
+  const btnApr = document.getElementById('btn-apr-' + itemId);
+  const btnRec = document.getElementById('btn-rec-' + itemId);
+
+  card.classList.toggle('aprovado', aprobado);
+  card.classList.toggle('recusado', !aprobado);
+
+  btnApr.disabled = true;
+  btnApr.className = 'btn-aprobar ' + (aprobado ? 'aprobado' : 'rechazado-btn');
+  btnApr.textContent = aprobado ? '✓ Aprobado' : 'Rechazado';
+  btnRec.classList.add('hidden');
+
+  bar.className = 'item-status-bar show ' + (aprobado ? 'aprovado' : 'recusado');
+  bar.textContent = aprobado ? '✅ Aprobado' : '❌ Rechazado' + (motivo ? ' — ' + motivo : '');
+}
+
+async function confirmarTodo() {
   const btn = document.getElementById('btn-confirmar');
   if (btn.classList.contains('disabled')) return;
   btn.textContent = 'Enviando...';
   btn.disabled = true;
 
-  const aprovados = Object.values(respostas).filter(Boolean).length;
-  const total = Object.keys(respostas).length;
-  let novoStatus = aprovados === total ? 'aprovado_total' : aprovados === 0 ? 'recusado' : 'aprovado_parcial';
+  const aprobados = Object.values(respuestas).filter(r => r.aprobado).length;
+  const total = Object.keys(respuestas).length;
+  const nuevoStatus = aprobados === total ? 'aprovado_total' : aprobados === 0 ? 'recusado' : 'aprovado_parcial';
 
-  await fetch(`${SUPABASE_URL}/rest/v1/orcamentos?id=eq.${orcamento.id}`, {
+  await fetch(`${SUPABASE_URL}/rest/v1/orcamentos?id=eq.${presupuesto.id}`, {
     method: 'PATCH',
     headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ status: novoStatus })
+    body: JSON.stringify({ status: nuevoStatus })
   });
 
   document.getElementById('app').style.display = 'none';
   document.getElementById('confirmado').classList.add('show');
 }
 
-// ============================================================
-// RESUMO E PROGRESSO
-// ============================================================
-function atualizarResumo() {
-  const total = itens.reduce((a, it) => a + (parseFloat(it.valor_pecas) || 0) + (parseFloat(it.valor_mao_obra) || 0), 0);
-  const aprovadosIds = Object.entries(respostas).filter(([,v]) => v).map(([k]) => k);
-  const aprovado = itens.filter(it => aprovadosIds.includes(it.id)).reduce((a, it) => a + (parseFloat(it.valor_pecas) || 0) + (parseFloat(it.valor_mao_obra) || 0), 0);
+function actualizarResumen() {
+  const totalSinIVA = items.reduce((a, it) => a + (parseFloat(it.valor_pecas) || 0) + (parseFloat(it.valor_mao_obra) || 0), 0);
+  const aprobadosIds = Object.entries(respuestas).filter(([,r]) => r.aprobado).map(([k]) => k);
+  const aprobadoSinIVA = items.filter(it => aprobadosIds.includes(it.id))
+    .reduce((a, it) => a + (parseFloat(it.valor_pecas) || 0) + (parseFloat(it.valor_mao_obra) || 0), 0);
+  const ivaAprobado = aprobadoSinIVA * IVA;
+  const totalAprobadoConIVA = aprobadoSinIVA + ivaAprobado;
 
-  document.getElementById('resumo-container').innerHTML = `
-    <div class="resumo-row"><span>Total de itens</span><span>${itens.length}</span></div>
-    <div class="resumo-row"><span>Itens aprovados</span><span style="color:var(--green)">${aprovadosIds.length}</span></div>
-    <div class="resumo-row"><span>Valor total</span><span>R$ ${total.toFixed(2).replace('.',',')}</span></div>
-    <div class="resumo-row resumo-total"><span>Valor aprovado</span><span class="resumo-aprovado">R$ ${aprovado.toFixed(2).replace('.',',')}</span></div>`;
+  const itemsNombre = items.filter(it => aprobadosIds.includes(it.id));
+
+  let rowsItems = itemsNombre.map(it => {
+    const v = (parseFloat(it.valor_pecas) || 0) + (parseFloat(it.valor_mao_obra) || 0);
+    return `<div class="resumen-row"><span>${it.titulo}</span><span>€${v.toFixed(2)}</span></div>`;
+  }).join('');
+
+  document.getElementById('resumen-container').innerHTML = `
+    ${rowsItems}
+    <div class="resumen-row"><span>Subtotal</span><span>€${aprobadoSinIVA.toFixed(2)}</span></div>
+    <div class="resumen-row"><span>IVA (21%)</span><span>€${ivaAprobado.toFixed(2)}</span></div>
+    <div class="resumen-total-row">
+      <span class="resumen-total-label">Total a pagar</span>
+      <span class="resumen-total-valor">€${totalAprobadoConIVA.toFixed(2)}</span>
+    </div>`;
 }
 
-function atualizarProgresso() {
-  const total = itens.length;
-  const respondidos = Object.keys(respostas).length;
+function actualizarProgreso() {
+  const total = items.length;
+  const respondidos = Object.keys(respuestas).length;
   const pct = total > 0 ? Math.round((respondidos / total) * 100) : 0;
 
-  document.getElementById('prog-label').textContent = `${respondidos} de ${total} itens respondidos`;
+  document.getElementById('prog-label').textContent = `${respondidos} de ${total} elementos revisados`;
   document.getElementById('prog-pct').textContent = pct + '%';
-  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progreso-fill').style.width = pct + '%';
 
   const btn = document.getElementById('btn-confirmar');
   if (respondidos === total && total > 0) {
     btn.classList.remove('disabled');
     btn.classList.add('enabled');
-    btn.textContent = 'Confirmar minha resposta ✓';
+    btn.textContent = 'Confirmar mi respuesta ✓';
     btn.disabled = false;
   } else {
     btn.classList.add('disabled');
     btn.classList.remove('enabled');
-    btn.textContent = `Revise todos os itens (${total - respondidos} pendentes)`;
+    btn.textContent = `Revisa todos los elementos (${total - respondidos} pendientes)`;
     btn.disabled = true;
   }
 }
 
-// ============================================================
-// LIGHTBOX E TOAST
-// ============================================================
 function openLightbox(src) {
   document.getElementById('lightbox-img').src = src;
   document.getElementById('lightbox').classList.add('open');
@@ -458,12 +546,9 @@ function toast(msg) {
 }
 
 function showError(msg) {
-  document.getElementById('loading').innerHTML = `<p style="color:var(--red);text-align:center;padding:20px">${msg}</p>`;
+  document.getElementById('loading').innerHTML = `<p style="color:var(--red);text-align:center;padding:40px 20px;font-size:15px">${msg}</p>`;
 }
 
-// ============================================================
-// INICIALIZAR
-// ============================================================
 init();
 </script>
 </body>

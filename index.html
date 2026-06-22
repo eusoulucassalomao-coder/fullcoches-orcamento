@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Novo Orçamento — Oficina</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --blue: #1a6fd4;
+    --blue-light: #e8f1fc;
+    --green: #16a34a;
+    --red: #dc2626;
+    --orange: #ea580c;
+    --gray: #6b7280;
+    --border: #e5e7eb;
+    --bg: #f9fafb;
+    --card: #ffffff;
+    --text: #111827;
+    --text-muted: #6b7280;
+    --radius: 12px;
+    --urgent: #fef2f2;
+    --urgent-border: #fca5a5;
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 40px; }
+
+  /* HEADER */
+  .header { background: var(--blue); color: #fff; padding: 16px 20px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 100; }
+  .header h1 { font-size: 17px; font-weight: 600; }
+  .header-icon { width: 36px; height: 36px; background: rgba(255,255,255,0.2); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+
+  /* STEPS */
+  .steps { display: flex; background: #fff; border-bottom: 1px solid var(--border); overflow-x: auto; }
+  .step { flex: 1; min-width: 80px; padding: 10px 4px; text-align: center; font-size: 11px; color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; white-space: nowrap; }
+  .step.active { color: var(--blue); border-bottom-color: var(--blue); font-weight: 600; }
+  .step.done { color: var(--green); }
+
+  /* SECTIONS */
+  .section { display: none; padding: 16px; }
+  .section.active { display: block; }
+
+  /* CARDS */
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 16px; }
+  .card-title { font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; }
+
+  /* INPUTS */
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; color: var(--text); }
+  .field label span { color: var(--red); }
+  .field input, .field select, .field textarea {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px;
+    font-size: 15px; color: var(--text); background: #fff; outline: none; transition: border-color 0.15s;
+    -webkit-appearance: none;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(26,111,212,0.1); }
+  .field textarea { min-height: 80px; resize: vertical; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* ITEM DE SERVIÇO */
+  .item-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; }
+  .item-header { padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; background: var(--bg); border-bottom: 1px solid var(--border); }
+  .item-num { font-size: 12px; font-weight: 600; color: var(--blue); }
+  .item-body { padding: 14px 16px; }
+  .urgencia-btns { display: flex; gap: 8px; margin-bottom: 14px; }
+  .urgencia-btn { flex: 1; padding: 8px 4px; border: 1px solid var(--border); border-radius: 8px; font-size: 12px; font-weight: 500; background: #fff; cursor: pointer; text-align: center; transition: all 0.15s; }
+  .urgencia-btn.urgente.selected { background: var(--urgent); border-color: var(--urgent-border); color: var(--red); }
+  .urgencia-btn.recomendado.selected { background: #fff7ed; border-color: #fed7aa; color: var(--orange); }
+  .urgencia-btn.normal.selected { background: #f0fdf4; border-color: #86efac; color: var(--green); }
+
+  /* UPLOAD FOTO */
+  .upload-area { border: 2px dashed var(--border); border-radius: 10px; padding: 16px; text-align: center; cursor: pointer; transition: all 0.15s; margin-bottom: 12px; position: relative; }
+  .upload-area:hover { border-color: var(--blue); background: var(--blue-light); }
+  .upload-area input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .upload-area .icon { font-size: 28px; margin-bottom: 6px; }
+  .upload-area p { font-size: 13px; color: var(--text-muted); }
+  .preview-img { width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; margin-top: 8px; display: none; }
+
+  /* GRAVAÇÃO DE ÁUDIO */
+  .audio-controls { display: flex; align-items: center; gap: 10px; padding: 12px; background: var(--bg); border-radius: 10px; margin-bottom: 12px; }
+  .btn-record { width: 44px; height: 44px; border-radius: 50%; border: none; background: var(--red); color: #fff; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0; }
+  .btn-record.recording { background: #7f1d1d; animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,0.4)} 50%{box-shadow:0 0 0 8px rgba(220,38,38,0)} }
+  .audio-info { flex: 1; }
+  .audio-info .label { font-size: 12px; color: var(--text-muted); }
+  .audio-info .timer { font-size: 20px; font-weight: 600; font-family: monospace; color: var(--text); }
+  audio { width: 100%; margin-top: 8px; display: none; }
+
+  /* VALORES */
+  .valores-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .valor-input { position: relative; }
+  .valor-input span { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 14px; }
+  .valor-input input { padding-left: 28px; }
+  .valor-total-item { text-align: right; font-size: 13px; color: var(--text-muted); margin-top: 8px; }
+  .valor-total-item strong { color: var(--green); font-size: 16px; }
+
+  /* BOTÕES */
+  .btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 20px; border-radius: 10px; font-size: 15px; font-weight: 600; border: none; cursor: pointer; transition: all 0.15s; width: 100%; }
+  .btn-primary { background: var(--blue); color: #fff; }
+  .btn-primary:hover { background: #1558b0; }
+  .btn-primary:active { transform: scale(0.98); }
+  .btn-secondary { background: var(--bg); border: 1px solid var(--border); color: var(--text); }
+  .btn-danger { background: var(--urgent); border: 1px solid var(--urgent-border); color: var(--red); }
+  .btn-add { background: var(--blue-light); color: var(--blue); border: 1px dashed #93c5fd; margin-bottom: 16px; }
+  .btn-green { background: var(--green); color: #fff; }
+  .btn-sm { padding: 7px 14px; font-size: 13px; width: auto; border-radius: 8px; }
+
+  /* NAVEGAÇÃO */
+  .nav-btns { display: flex; gap: 10px; margin-top: 8px; }
+  .nav-btns .btn { flex: 1; }
+
+  /* TOTAIS */
+  .totais-card { background: #f0fdf4; border: 1px solid #86efac; border-radius: var(--radius); padding: 16px; margin-bottom: 16px; }
+  .totais-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #bbf7d0; }
+  .totais-row:last-child { border-bottom: none; font-size: 18px; font-weight: 700; color: var(--green); }
+
+  /* TOAST */
+  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #1f2937; color: #fff; padding: 12px 20px; border-radius: 10px; font-size: 14px; z-index: 999; display: none; white-space: nowrap; }
+  .toast.show { display: block; animation: slideUp 0.3s ease; }
+  @keyframes slideUp { from{opacity:0;transform:translateX(-50%) translateY(10px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
+
+  /* SPINNER */
+  .spinner { width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<!-- CONFIGURAÇÕES — altere aqui -->
+<script>
+const SUPABASE_URL = 'https://afaovhhtrrfmdyqxxkdy.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmYW92aGh0cnJmbWR5cXh4a2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNjA1MjYsImV4cCI6MjA5NjczNjUyNn0.tCdeOxprpPwbJLchm65tC5TQU2rIw8UQht6LJNoEgyk';
+const MECANICO_NOME = 'Christian';
+const OFICINA_NOME = 'FullCoche';
+const WHATSAPP_API_URL = 'https://disparos-evolution-api.4g35ai.easypanel.host';
+const WHATSAPP_INSTANCE = 'FullCoches01';
+const WHATSAPP_API_KEY = '0054D07FDB0B-4454-8EE2-EB25141F0C9B';
+</script>
+
+<div class="header">
+  <div class="header-icon">🔧</div>
+  <h1>Novo Orçamento</h1>
+</div>
+
+<!-- STEPS -->
+<div class="steps">
+  <div class="step active" onclick="goStep(0)" id="step-0">1. Cliente</div>
+  <div class="step" onclick="goStep(1)" id="step-1">2. Veículo</div>
+  <div class="step" onclick="goStep(2)" id="step-2">3. Itens</div>
+  <div class="step" onclick="goStep(3)" id="step-3">4. Revisão</div>
+</div>
+
+<!-- SEÇÃO 1: CLIENTE -->
+<div class="section active" id="sec-0">
+  <div class="card">
+    <div class="card-title">Dados do Cliente</div>
+    <div class="field">
+      <label>Nome completo <span>*</span></label>
+      <input type="text" id="cliente_nome" placeholder="Ex: João Silva">
+    </div>
+    <div class="field">
+      <label>WhatsApp <span>*</span></label>
+      <input type="tel" id="cliente_telefone" placeholder="(00) 00000-0000">
+    </div>
+    <div class="field">
+      <label>E-mail</label>
+      <input type="email" id="cliente_email" placeholder="opcional">
+    </div>
+  </div>
+  <div class="nav-btns">
+    <button class="btn btn-primary" onclick="nextStep(0)">Próximo →</button>
+  </div>
+</div>
+
+<!-- SEÇÃO 2: VEÍCULO -->
+<div class="section" id="sec-1">
+  <div class="card">
+    <div class="card-title">Dados do Veículo</div>
+    <div class="row2">
+      <div class="field">
+        <label>Marca <span>*</span></label>
+        <input type="text" id="veiculo_marca" placeholder="Ex: Toyota">
+      </div>
+      <div class="field">
+        <label>Modelo <span>*</span></label>
+        <input type="text" id="veiculo_modelo" placeholder="Ex: Corolla">
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>Ano</label>
+        <input type="text" id="veiculo_ano" placeholder="2020">
+      </div>
+      <div class="field">
+        <label>KM atual</label>
+        <input type="text" id="veiculo_km" placeholder="Ex: 85.000">
+      </div>
+    </div>
+    <div class="field">
+      <label>Placa <span>*</span></label>
+      <input type="text" id="veiculo_placa" placeholder="ABC-1D23" style="text-transform:uppercase">
+    </div>
+  </div>
+  <div class="nav-btns">
+    <button class="btn btn-secondary" onclick="goStep(0)">← Voltar</button>
+    <button class="btn btn-primary" onclick="nextStep(1)">Próximo →</button>
+  </div>
+</div>
+
+<!-- SEÇÃO 3: ITENS -->
+<div class="section" id="sec-2">
+  <div id="itens-container"></div>
+  <button class="btn btn-add" onclick="addItem()">+ Adicionar item / problema</button>
+  <div class="field">
+    <label>Observações gerais</label>
+    <textarea id="observacoes" placeholder="Anotações adicionais para o cliente..."></textarea>
+  </div>
+  <div class="nav-btns">
+    <button class="btn btn-secondary" onclick="goStep(1)">← Voltar</button>
+    <button class="btn btn-primary" onclick="nextStep(2)">Revisar →</button>
+  </div>
+</div>
+
+<!-- SEÇÃO 4: REVISÃO -->
+<div class="section" id="sec-3">
+  <div class="card" id="resumo-card"></div>
+  <div class="totais-card" id="totais-card"></div>
+  <button class="btn btn-green" id="btn-enviar" onclick="enviarOrcamento()">
+    <span>Gerar e Enviar no WhatsApp</span>
+  </button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// ESTADO GLOBAL
+// ============================================================
+let currentStep = 0;
+let itens = [];
+let mediaRecorders = {};
+let audioBlobs = {};
+let recordingTimers = {};
+
+// ============================================================
+// NAVEGAÇÃO
+// ============================================================
+function goStep(n) {
+  document.querySelectorAll('.section').forEach((s, i) => s.classList.toggle('active', i === n));
+  document.querySelectorAll('.step').forEach((s, i) => {
+    s.classList.remove('active', 'done');
+    if (i === n) s.classList.add('active');
+    else if (i < n) s.classList.add('done');
+  });
+  currentStep = n;
+  window.scrollTo(0, 0);
+  if (n === 3) buildResumo();
+}
+
+function nextStep(n) {
+  if (!validarStep(n)) return;
+  goStep(n + 1);
+}
+
+function validarStep(n) {
+  if (n === 0) {
+    if (!v('cliente_nome')) return toast('Informe o nome do cliente'), false;
+    if (!v('cliente_telefone')) return toast('Informe o WhatsApp do cliente'), false;
+  }
+  if (n === 1) {
+    if (!v('veiculo_marca')) return toast('Informe a marca'), false;
+    if (!v('veiculo_modelo')) return toast('Informe o modelo'), false;
+    if (!v('veiculo_placa')) return toast('Informe a placa'), false;
+  }
+  if (n === 2) {
+    if (itens.length === 0) return toast('Adicione pelo menos 1 item'), false;
+    for (let i = 0; i < itens.length; i++) {
+      if (!document.getElementById('titulo_' + i)?.value) return toast('Item ' + (i+1) + ': informe o título'), false;
+    }
+  }
+  return true;
+}
+
+function v(id) { return document.getElementById(id)?.value?.trim(); }
+
+// ============================================================
+// ITENS
+// ============================================================
+function addItem() {
+  const idx = itens.length;
+  itens.push({ urgencia: 'normal', fotoBlob: null, audioBlob: null });
+  const c = document.getElementById('itens-container');
+  const div = document.createElement('div');
+  div.className = 'item-card';
+  div.id = 'item_' + idx;
+  div.innerHTML = `
+    <div class="item-header">
+      <span class="item-num">Item ${idx + 1}</span>
+      <button class="btn btn-danger btn-sm" onclick="removeItem(${idx})">Remover</button>
+    </div>
+    <div class="item-body">
+      <div class="field">
+        <label>Título do problema <span>*</span></label>
+        <input type="text" id="titulo_${idx}" placeholder="Ex: Pastilha de freio dianteira">
+      </div>
+      <div class="field">
+        <label>Urgência</label>
+        <div class="urgencia-btns">
+          <button class="urgencia-btn urgente" onclick="setUrgencia(${idx},'urgente',this)">🔴 Urgente</button>
+          <button class="urgencia-btn recomendado" onclick="setUrgencia(${idx},'recomendado',this)">🟡 Recomendado</button>
+          <button class="urgencia-btn normal selected" onclick="setUrgencia(${idx},'normal',this)">🟢 Normal</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Descrição</label>
+        <textarea id="desc_${idx}" placeholder="Explique o problema encontrado..." rows="3"></textarea>
+      </div>
+
+      <!-- FOTO -->
+      <div class="field">
+        <label>Foto da avaria</label>
+        <div class="upload-area" id="upload_${idx}">
+          <input type="file" accept="image/*" capture="environment" onchange="previewFoto(${idx}, this)">
+          <div class="icon">📷</div>
+          <p>Toque para fotografar ou escolher imagem</p>
+        </div>
+        <img class="preview-img" id="preview_${idx}">
+      </div>
+
+      <!-- ÁUDIO -->
+      <div class="field">
+        <label>Áudio explicativo</label>
+        <div class="audio-controls">
+          <button class="btn-record" id="btnRec_${idx}" onclick="toggleRecording(${idx})">🎙️</button>
+          <div class="audio-info">
+            <div class="label" id="audioLabel_${idx}">Pressione para gravar</div>
+            <div class="timer" id="timer_${idx}">0:00</div>
+          </div>
+        </div>
+        <audio id="audio_${idx}" controls></audio>
+      </div>
+
+      <!-- VALORES -->
+      <div class="field">
+        <label>Valores (R$)</label>
+        <div class="valores-row">
+          <div class="valor-input">
+            <span>R$</span>
+            <input type="number" id="pecas_${idx}" placeholder="Peças" min="0" step="0.01" oninput="calcTotal(${idx})">
+          </div>
+          <div class="valor-input">
+            <span>R$</span>
+            <input type="number" id="mo_${idx}" placeholder="Mão de obra" min="0" step="0.01" oninput="calcTotal(${idx})">
+          </div>
+        </div>
+        <div class="valor-total-item">Total: <strong id="vtotal_${idx}">R$ 0,00</strong></div>
+      </div>
+    </div>`;
+  c.appendChild(div);
+}
+
+function removeItem(idx) {
+  document.getElementById('item_' + idx)?.remove();
+  itens[idx] = null;
+}
+
+function setUrgencia(idx, val, btn) {
+  itens[idx].urgencia = val;
+  btn.closest('.urgencia-btns').querySelectorAll('.urgencia-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function previewFoto(idx, input) {
+  const file = input.files[0];
+  if (!file) return;
+  itens[idx].fotoBlob = file;
+  const img = document.getElementById('preview_' + idx);
+  img.src = URL.createObjectURL(file);
+  img.style.display = 'block';
+  document.querySelector('#upload_' + idx + ' p').textContent = '✅ ' + file.name;
+}
+
+function calcTotal(idx) {
+  const p = parseFloat(document.getElementById('pecas_' + idx)?.value) || 0;
+  const m = parseFloat(document.getElementById('mo_' + idx)?.value) || 0;
+  document.getElementById('vtotal_' + idx).textContent = 'R$ ' + (p + m).toFixed(2).replace('.', ',');
+}
+
+// ============================================================
+// GRAVAÇÃO DE ÁUDIO
+// ============================================================
+async function toggleRecording(idx) {
+  if (mediaRecorders[idx]?.state === 'recording') {
+    stopRecording(idx);
+  } else {
+    await startRecording(idx);
+  }
+}
+
+async function startRecording(idx) {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const mr = new MediaRecorder(stream);
+    mediaRecorders[idx] = mr;
+    const chunks = [];
+    mr.ondataavailable = e => chunks.push(e.data);
+    mr.onstop = () => {
+      const blob = new Blob(chunks, { type: 'audio/webm' });
+      audioBlobs[idx] = blob;
+      itens[idx].audioBlob = blob;
+      const url = URL.createObjectURL(blob);
+      const audio = document.getElementById('audio_' + idx);
+      audio.src = url;
+      audio.style.display = 'block';
+      document.getElementById('audioLabel_' + idx).textContent = '✅ Áudio gravado';
+    };
+    mr.start();
+    document.getElementById('btnRec_' + idx).classList.add('recording');
+    document.getElementById('btnRec_' + idx).textContent = '⏹️';
+    document.getElementById('audioLabel_' + idx).textContent = 'Gravando...';
+    let secs = 0;
+    recordingTimers[idx] = setInterval(() => {
+      secs++;
+      const m = Math.floor(secs / 60);
+      const s = (secs % 60).toString().padStart(2, '0');
+      document.getElementById('timer_' + idx).textContent = m + ':' + s;
+    }, 1000);
+  } catch(e) {
+    toast('Permita o acesso ao microfone');
+  }
+}
+
+function stopRecording(idx) {
+  mediaRecorders[idx]?.stop();
+  mediaRecorders[idx]?.stream?.getTracks().forEach(t => t.stop());
+  clearInterval(recordingTimers[idx]);
+  document.getElementById('btnRec_' + idx).classList.remove('recording');
+  document.getElementById('btnRec_' + idx).textContent = '🎙️';
+}
+
+// ============================================================
+// RESUMO
+// ============================================================
+function buildResumo() {
+  const itensFiltrados = itens.filter(Boolean);
+  let totalGeral = 0;
+  let htmlItens = '';
+  itensFiltrados.forEach((item, i) => {
+    const idx = itens.indexOf(item);
+    const titulo = document.getElementById('titulo_' + idx)?.value || '';
+    const p = parseFloat(document.getElementById('pecas_' + idx)?.value) || 0;
+    const m = parseFloat(document.getElementById('mo_' + idx)?.value) || 0;
+    const total = p + m;
+    totalGeral += total;
+    const urgBadge = { urgente: '🔴 Urgente', recomendado: '🟡 Recomendado', normal: '🟢 Normal' }[item.urgencia];
+    htmlItens += `<div style="padding:10px 0;border-bottom:1px solid var(--border)">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <strong>${titulo}</strong><span style="color:var(--green);font-weight:600">R$ ${total.toFixed(2).replace('.', ',')}</span>
+      </div>
+      <div style="font-size:12px;color:var(--text-muted);margin-top:4px">${urgBadge} ${item.fotoBlob ? '· 📷 Foto' : ''} ${item.audioBlob ? '· 🎙️ Áudio' : ''}</div>
+    </div>`;
+  });
+
+  document.getElementById('resumo-card').innerHTML = `
+    <div class="card-title">Resumo do Orçamento</div>
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px">
+      <strong>${v('cliente_nome')}</strong> · ${v('cliente_telefone')}<br>
+      ${v('veiculo_marca')} ${v('veiculo_modelo')} ${v('veiculo_ano') || ''} · ${v('veiculo_placa')}
+    </p>
+    ${htmlItens}`;
+
+  document.getElementById('totais-card').innerHTML = `
+    <div class="totais-row"><span>Total de itens</span><span>${itensFiltrados.length}</span></div>
+    <div class="totais-row"><span>Valor total estimado</span><strong>R$ ${totalGeral.toFixed(2).replace('.', ',')}</strong></div>`;
+}
+
+// ============================================================
+// ENVIO PARA SUPABASE
+// ============================================================
+async function enviarOrcamento() {
+  const btn = document.getElementById('btn-enviar');
+  btn.innerHTML = '<div class="spinner"></div> Salvando...';
+  btn.disabled = true;
+
+  try {
+    // 1. Criar orçamento
+    const orcRes = await fetch(`${SUPABASE_URL}/rest/v1/orcamentos`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify({
+        cliente_nome: v('cliente_nome'),
+        cliente_telefone: v('cliente_telefone').replace(/\D/g, ''),
+        cliente_email: v('cliente_email'),
+        veiculo_marca: v('veiculo_marca'),
+        veiculo_modelo: v('veiculo_modelo'),
+        veiculo_ano: v('veiculo_ano'),
+        veiculo_placa: v('veiculo_placa')?.toUpperCase(),
+        veiculo_km: v('veiculo_km'),
+        mecanico_nome: MECANICO_NOME,
+        oficina_nome: OFICINA_NOME,
+        observacoes: v('observacoes'),
+        valor_total: calcTotalGeral()
+      })
+    });
+   const orcData = await orcRes.json();
+if (!orcRes.ok) {
+  console.error('Erro Supabase:', orcData);
+  throw new Error('Erro ao criar orçamento: ' + JSON.stringify(orcData));
+}
+const orcamento = Array.isArray(orcData) ? orcData[0] : orcData;
+const orcId = orcamento.id;
+const token = orcamento.link_token;
+
+    // 2. Salvar cada item
+    const itensFiltrados = itens.filter(Boolean);
+    for (let i = 0; i < itensFiltrados.length; i++) {
+      const item = itensFiltrados[i];
+      const idx = itens.indexOf(item);
+      let fotoUrl = null, audioUrl = null;
+
+      // Upload foto
+      if (item.fotoBlob) {
+        const ext = item.fotoBlob.name?.split('.').pop() || 'jpg';
+        const path = `${orcId}/${idx}.${ext}`;
+        await fetch(`${SUPABASE_URL}/storage/v1/object/fotos-avarias/${path}`, {
+          method: 'POST',
+          headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': item.fotoBlob.type },
+          body: item.fotoBlob
+        });
+        fotoUrl = `${SUPABASE_URL}/storage/v1/object/public/fotos-avarias/${path}`;
+      }
+
+      // Upload áudio
+      if (item.audioBlob) {
+        const path = `${orcId}/${idx}.webm`;
+        await fetch(`${SUPABASE_URL}/storage/v1/object/audios-mecanico/${path}`, {
+          method: 'POST',
+          headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'audio/webm' },
+          body: item.audioBlob
+        });
+        audioUrl = `${SUPABASE_URL}/storage/v1/object/public/audios-mecanico/${path}`;
+      }
+
+      // Salvar item
+      await fetch(`${SUPABASE_URL}/rest/v1/itens_orcamento`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+        },
+        body: JSON.stringify({
+          orcamento_id: orcId,
+          titulo: document.getElementById('titulo_' + idx)?.value,
+          descricao: document.getElementById('desc_' + idx)?.value,
+          urgencia: item.urgencia,
+          valor_pecas: parseFloat(document.getElementById('pecas_' + idx)?.value) || 0,
+          valor_mao_obra: parseFloat(document.getElementById('mo_' + idx)?.value) || 0,
+          foto_url: fotoUrl,
+          audio_url: audioUrl,
+          ordem: i
+        })
+      });
+    }
+
+    // 3. Enviar WhatsApp
+    const linkCliente = `${window.location.origin}/orcamento.html?token=${token}`;
+    await enviarWhatsApp(v('cliente_telefone').replace(/\D/g, ''), v('cliente_nome'), linkCliente, v('veiculo_marca') + ' ' + v('veiculo_modelo'));
+
+    toast('✅ Orçamento enviado com sucesso!');
+    btn.innerHTML = '✅ Enviado!';
+    btn.style.background = 'var(--green)';
+
+    setTimeout(() => {
+      if (confirm('Orçamento enviado! Deseja criar um novo?')) location.reload();
+    }, 1500);
+
+  } catch(e) {
+    console.error(e);
+    toast('❌ Erro ao salvar. Tente novamente.');
+    btn.innerHTML = 'Gerar e Enviar no WhatsApp';
+    btn.disabled = false;
+  }
+}
+
+function calcTotalGeral() {
+  return itens.filter(Boolean).reduce((acc, item, i) => {
+    const idx = itens.indexOf(item);
+    const p = parseFloat(document.getElementById('pecas_' + idx)?.value) || 0;
+    const m = parseFloat(document.getElementById('mo_' + idx)?.value) || 0;
+    return acc + p + m;
+  }, 0);
+}
+
+async function enviarWhatsApp(telefone, nome, link, veiculo) {
+  const mensagem = `Olá ${nome}! 👋\n\nSeu veículo *${veiculo}* foi inspecionado.\n\nAcesse o orçamento completo com fotos e explicações do mecânico:\n\n🔗 ${link}\n\n_Você pode aprovar ou recusar cada item individualmente._`;
+  await fetch(`${WHATSAPP_API_URL}/message/sendText/${WHATSAPP_INSTANCE}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'apikey': WHATSAPP_API_KEY },
+    body: JSON.stringify({ number: '55' + telefone, text: mensagem })
+  });
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// Inicializa com 1 item
+addItem();
+</script>
+</body>
+</html>
